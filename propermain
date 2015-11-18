@@ -1,0 +1,93 @@
+#!/bin/bash
+#Created by Dejan Mandic and Chistian Dunn
+#CSE 224 2015
+#This program will use Zenity to create a travel reservation system
+#create a dialog box to ask for the traveler's name
+#display list of cities from which the traveler may depart (7 or more)
+#Display list of destinations
+#display calendar dialog for departure date ; and for return date
+#Ask how many bags user is checking
+#display summary of this information on the terminal
+#search file named reservations.txt for users name, if they already have one remove that reservation
+#add the users latest reservation, stored as name|dep city|dest city|dep date|return date| # bags
+
+
+#sets user name, does a simple check to see if anything was entered, ends if nothing
+if name=`zenity --entry \
+--title="Name" \
+--text="Please enter your name:"`
+then x=1
+fi
+
+
+departure=`cat destinations.txt | zenity --list --title="Choose your Departure City" --column="City" `
+
+#displays possible Destinations
+destination=`grep -v -e "^$departure" destinations.txt | zenity --list --title="return" --column="City"`
+
+x=1
+
+while [ $x -eq 1 ]
+do
+# this opens the dialog to choose departure and return dates
+dept=`zenity --calendar --text="Choose your Departure Date"`
+rtn=`zenity --calendar --text="Choose your Return Date"`
+
+# this parses the information so we can compare the day/month/year to see if the return date is before the departure date.
+m1=${dept:0:2} ;d1=${dept:3:2};y1=${dept:6:4}
+m2=${rtn:0:2};d2=${rtn:3:2};y2=${rtn:6:4}
+
+if [ $y1 -le $y2 ]
+	then if [ $m1 -le $m2 ]
+		then if [ $d1 -le $d2 ]
+			then x=0
+			else if ! zenity --question --text="Sadly we do not allow time travel in that direction. Would you like to reselect your dates?" \
+						--icon-name=dialog-error
+				then exit 0
+				else x=1
+				fi
+		fi
+		else if ! zenity --question --text="Sadly we do not allow time travel in that direction. Would you like to reselect your dates?" \
+                                                --icon-name=dialog-error
+                     then exit 0
+                     else x=1
+                     fi
+	fi
+
+else if ! zenity --question --text="Sadly we do not allow time travel in that direction. Would you like to reselect your dates?" \
+                                                --icon-name=dialog-error
+      then exit 0
+      else x=1
+      fi
+fi
+done
+
+bags=`zenity --entry --title="Bags:" --text="How many bags would you like to check. If none enter 0."`
+
+echo "Your name : $name"
+echo "Your departure city is : $departure"
+echo "Your desintation: $destination"
+echo "Your Departure Date: $dept"
+echo "Your Return Date: $rtn"
+echo "Number of Bags: $bags"
+
+FILE="./reservations.txt"
+entry="$name|$departure|$destination|$dept|$rtn|$bags"
+echo $entry
+#make file if it doesnt exist.
+if [ ! -f $FILE ] 
+then
+echo "" >> $FILE #echo nothing to create the file.
+fi
+
+grep -e "^$name|.*" $FILE
+
+if [ $? == 0 ]
+then #if the file already has a reservation entry for the name then replace it.
+sed -i -e "s@^$name|.*@$entry@" $FILE; #used @ instead of / as the date /'s was throwing it off.
+
+
+else
+#if the name isnt already listed append onto end
+echo $entry >> $FILE
+fi
