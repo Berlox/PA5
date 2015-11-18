@@ -1,0 +1,107 @@
+#!/bin/bash
+#Created by Dejan Mandic and Chistian Dunn
+#CSE 224 2015
+#This program will use Zenity to create a travel reservation system
+#create a dialog box to ask for the traveler's name
+#display list of cities from which the traveler may depart (7 or more)
+#Display list of destinations
+#display calendar dialog for departure date ; and for return date
+#Ask how many bags user is checking
+#display summary of this information on the terminal
+#search file named reservations.txt for users name, if they already have one remove that reservation
+#add the users latest reservation, stored as name|dep city|dest city|dep date|return date| # bags
+
+x=1
+while [ $x -eq 1 ]
+do
+#sets user name, does a simple check to see if anything was entered, ends if nothing
+if name=`zenity --entry \
+--title="Name" \
+--text="Please enter your name:"`
+then x=1
+if `zenity --question --text="There was no name entered. Would you like to cancel?" --icon-name=dialog-question`
+then x=1
+else break
+fi
+else echo "No Name entered"
+x=0
+fi
+done
+#this is the list of possible locations, this makes it easier to change them
+loc0="Vancouver" ; loc1="Chicago" ; loc2="Portland" ; loc3="New York" ; loc4="Seattle"
+loc5="Los Angeles" ; loc6="Dallas" ;
+
+#displays possible departure cities
+departure=`zenity --list \
+--title="Choose your Departure City" \
+--column="City" \
+"$loc0" "$loc1" "$loc2" "$loc3" "$loc4" "$loc5" "$loc6"`
+
+#displays possible Destinations
+case $departure in
+"$loc0")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc1" "$loc2" "$loc3" "$loc4" "$loc5" "$loc6"`;;
+"$loc1")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc0" "$loc2" "$loc3" "$loc4" "$loc5" "$loc6"`;;
+"$loc2")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc0" "$loc1" "$loc3" "$loc4" "$loc5" "$loc6"`;;
+"$loc3")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc0" "$loc1" "$loc2" "$loc4" "$loc5" "$loc6"`;;
+"$loc4")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc0" "$loc1" "$loc2" "$loc3" "$loc5" "$loc6"`;;
+"$loc5")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc0" "$loc1" "$loc2" "$loc3" "$loc4" "$loc6"`;;
+"$loc6")
+destination=`zenity --list \
+--title="Choose your Destination" \
+--column="City" \
+"$loc0" "$loc1" "$loc2" "$loc3" "$loc4" "$loc5"`;;
+esac
+
+x=1
+
+while [ $x -eq 1 ]
+do
+
+dept=`zenity --calendar --text="Choose your Departure Date"`
+rtn=`zenity --calendar --text="Choose your Return Date"`
+
+m1=${dept:0:2} ;d1=${dept:3:2};y1=${dept:6:4}
+m2=${rtn:0:2};d2=${rtn:3:2};y2=${rtn:6:4}
+
+if [ $y1 -le $y2 ]
+	then if [ $m1 -le $m2 ]
+		then if [ $d1 -le $d2 ]
+			then x=0
+			else zenity --error --text="Sadly we do not allow time travel in that direction. Please reselect your Departure and Return dates" \
+						--icon-name=dialog-error
+				x=1
+		fi
+		else zenity --error --text="Sadly we do not allow time travel to the past" \
+                                                --icon-name=dialog-error
+		x=1
+	fi
+	else zenity --error --text="Sadly we do not allow time travel to the past" \
+                                                --icon-name=dialog-error
+	x=1
+fi
+
+done
