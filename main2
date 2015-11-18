@@ -114,3 +114,23 @@ echo "Your desintation: $destination"
 echo "Your Departure Date: $dept"
 echo "Your Return Date: $rtn"
 echo "Number of Bags: $bags"
+
+FILE="./reservations.txt"
+entry="$name|$departure|$destination|$dept|$rtn|$bags"
+#make file if it doesnt exist.
+if [ ! -f $FILE ] 
+then
+echo "" >> $FILE #echo nothing to create the file.
+fi
+
+grep -e "^$name|.*" $FILE
+
+if [ $? == 0 ]
+then #if the file already has a reservation entry for the name then replace it.
+sed -e "s@^$name|.*@$entry@" $FILE
+
+else
+#if the name isnt already listed append onto end
+
+echo $entry >> $FILE
+fi
