@@ -72,7 +72,7 @@ echo "Your Return Date: $rtn"
 echo "Number of Bags: $bags"
 
 FILE="./reservations.txt"
-entry="$name|$departure|$destination|$dept|$rtn|$bags"
+#entry="$name|$departure|$destination|$dept|$rtn|$bags"
 echo $entry
 #make file if it doesnt exist.
 if [ ! -f $FILE ] 
